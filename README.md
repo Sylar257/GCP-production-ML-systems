@@ -140,17 +140,46 @@ gcloud ai-platform models create ${MODEL_NAME} --regions $REGION
 gcloud ai-platform versions create ${MODEL_VERSION} --model ${MODEL_NAME} --origin ${MODEL_LOCATION} --runtime-version $TFVERSION
 ```
 
-Now we need two
-
-
-
-
-
 ## Data_Ingesting
 
+### Data On-Premise
 
+This might be the simplest case where we just need to *drag-and-drop* the data into the **google cloud bucket**. 
+
+We can use **gsutil** to move data to *Google Cloud Storage**:
+
+```python
+# This copy all the text files in my local directory to my GCP bucket
+gsutil cp *.txt gs://my-bucket
+```
+
+In more general format:
+
+```python
+# include -m here to enable multi-threading
+gsutil -m cp -r [SOURCE_DIRECTORY] gs://[BUCKET_NAME]
+```
+
+### Large Datasets
+
+Definition of *large* here is about 60 TB of data. One of the newly available options is receiving a physical Google device called a **Transfer Appliance**, which is Google’s rackable high-capacity storage server. Once received we can load data at our own datacenter on the **transfer appliance** and ship the data over to **GCP**.
 
 ## Adaptable_ml_system
+
+The distribution of input data can change for a number of reasons. For example, sometimes the distribution of the label changes. We’ve looked at the natality dataset in BigQuery and tried to predict baby weight. We might notice that baby weight has actually changed over time. It peaked in the 1980s and has since be declining.
+
+![distribution_change](images\distribution_change.png)
+
+When the distribution of the label changes, it could mean that the relationship between features and labels is changing as well. At the very least, it’s likely that our model’s predictions which will typically match the distribution of the labels in the training set will be significantly less accurate.
+
+Sometimes, it’s not labels but the features that change their distributions. This would be a more obvious cause of effecting model prediction accuracy.
+
+To remedy this, take the following precautions:
+
+* Monitor **descriptive statistics** for our inputs and outputs
+* Monitor our residuals as a function of our input
+* Use custom weights in our loss function to emphasize **data recency**
+* Use **dynamic training** architecture and regularly retrain our model
 
 
 
