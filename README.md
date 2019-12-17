@@ -181,7 +181,25 @@ To remedy this, take the following precautions:
 * Use custom weights in our loss function to emphasize **data recency**
 * Use **dynamic training** architecture and regularly retrain our model
 
+### Training/Serving Skew
 
+Three common causes for this problem:
+
+1. A discrepancy between how we handle data in the training and serving **pipeline**.
+2. A change in the data between when we train and when we serve.
+3. A feedback loop between our model and our algorithm.
+
+One of the best ways of mitigating training serving skew is to *write code that can be used for both development and production.* If development production were the same, this would be relatively trivial, but often times, they’re different.
+
+In the Jupiter notebook in this [link]() you will see how to use **polymorphism** to abstract the environment dependent aspects of the code while also **reusing the parts of the code that need to remain functionally equivalent**.
+
+A common scenario we might encounter is that our training data is already collected and is in batches while our serving data comes in stream. In development, we might ingest data from CSV files and use our model to write our predictions to other CSV files. In production though, our users are making requests in *real-time*, and so our input will be **streaming**. 
+
+![development-serving-data](images\development-serving-data.png)
+
+In GCP, streaming input can be captured by **Pub/Sub** and our output could be sent to some **data warehouse**. Critically, the input and output steps are different in these two pipelines are shown above. In order to use *polymorphism* here, we will define an abstract class within our two functions read instances and write predictions, and these functions will be left **abstract**. They are **readInstances()** and **writePredictions()**. We will then implement those functions into child classes, **TextInputOoutput**, which will be our development pipeline, and **PubSub BigQuery**,which will be our production pipeline.
+
+![polymorphism](images\polymorphism.png)
 
 ## High_performance_ML_system
 
