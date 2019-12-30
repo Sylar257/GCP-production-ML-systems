@@ -203,6 +203,33 @@ In GCP, streaming input can be captured by **Pub/Sub** and our output could be s
 
 ## High_performance_ML_system
 
- 
+### Training for high-performing model
+
+Things to consider:
+
+* training budget： time and cost
+* scale: time and accuracy trade-off
+* one strong machine or several weaker machines
+* transfer learning for time-saving
+
+![tuning_performance_to_reduce_training_time](images\tuning_performance_to_reduce_training_time.png)
+
+### Predictions
+
+Considerations for inference time:
+
+* Time for each prediction
+* Cost 
+* Scale. Do we do predictions on single machines or a distributed system
+
+We usually scale out the predictions onto **multiple workers**. Essentially, each prediction is handled by a **microservice** and we can replicate and scale out the predictions using **Kubernetes** or **App Engine**.
+
+### Distributed training
+
+
+
+
+
+
 
 ## Hybrid_ML_system
