@@ -226,7 +226,94 @@ We usually scale out the predictions onto **multiple workers**. Essentially, eac
 
 ### Distributed training
 
+We could run the ML model on a hardware that was suitable for GPUs or TPUs. We can also scale out the training onto *multiple machines*. However, all these three suing **heterogeneous systems** for ML training, training on distributed systems of machines or experimenting with model architectures, they all add complexity to our production ML system.
 
+Training complex networks with large amounts of data can often take a long time. There are a number of thing that we can do to make our training faster. We can use more powerful device such as TPUs (Tensor Processing Unit). Distributed training allows us to train our model in **parallel** on many devices such as CPUs or GPUs or TPUs in order to speed up the training.
+
+With distributed training, we go from using one machine with a single device to *a machine with multiple devices attached to it*. Finally, to *multiple machines possibly with multiple devices each connected over a network*. Eventually, the various approaches will allow us to scale up to hundreds of devices.
+
+#### Data parallelism
+
+The most common architecture for **distributed training** is known as **data parallelism**. Data parallelism will train the same **model and computation** on every device, but train each of them using **different training samples**. Each device computes loss and gradients based on the training samples it sees, then update the model’s parameters using all of these gradients. The updated model is then used in the next round of computation.
+
+![data_parallelism](images\data_parallelism.png)
+
+### Faster input pipelines
+
+When we use multiple GPUs/TPUs, these devices reduces the training time for one step significantly. Hence, as we increase the number of GPUs/TPUs the input pipeline could become the *bottleneck*. This mean when the GPUs/TPUs finish one step of computation, the next batch of input is not ready yet.
+
+![bottleneck](images\bottleneck.png)
+
+There are three approaches to read data into TensorFlow:
+
+1. Directly feed from Python(easiest and slowest). The entire dataset is held in memory
+
+   ![feed_from_python](images\feed_from_python.png)
+
+2. **Native TensorFlow Ops**.
+
+   ![native_tensorflow_ops](images\native_tensorflow_ops.png)
+
+   We define `decode_csv()` function and apply it to every `TextLineDataset` that we read.
+
+   ![native_tensorflow_ops_images](images\native_tensorflow_ops_images.png)
+
+   Similar pipeline using native tf Ops to construct image `dataset`
+
+3. Read **transformed tf records**(fastest)
+
+   ![preprocessing_tfRecorde](images\preprocessing_tfRecorde.png)
+
+   If we convert the images into TensorFlow records, later in the pipeline, we can read the data quite rapidly. TFRecords are set for fast efficient batch reads without the overhead of  *having to parse the data in Python*. GCP use **Apache Beam** to do the preprocessing.
+
+![image_pipeline_example](images\image_pipeline_example.png)
+
+`tf.data` is a good API for building input pipelines in TensorFlow. It enables us to build complex input pipelines from simple, reusable pieces. It makes it easy to deal with large amounts of data, different data formats, and complicated transformations. 
+
+We use `tf.data.Dataset.list_files()` to grab a bunch of input files containing the images and labels. We then parse them using `tf.data.TFRecordDataset()`. 
+
+**Shuffle** and **repeat** them a few times if we want to run multiple epochs. Finally, we preprocess each record using `dataset.map()` to the `preproc_fn`s. Lastly, we would **batch** the input based on the desired batch size.
+
+![image_pipeline_example_parallelism](images\image_pipeline_example_parallelism.png)
+
+To parallelize, add `num_parallel_reads= ` and `num_parallel_calls=` to the corresponding positions. In addition, add `dataset.prefetch(buffer_size=1)` to prefetch our data into a buffer and parallel with the training step. This means that we have the input data for the next training step before the current one is completed.
+
+### Data parallelism with All Reduce using `tf.estimator`
+
+Training a customized tf model  with Estimator API:
+
+```python
+run_config = tf.estimator.RunConfig()
+
+# here is how we specify the estimator
+classifier = tf.estimator.Estimator(
+							model_fn  = model_function,
+  						model_dir = model_dir,
+  						config    = config
+)
+
+classifier.train(input_fn = input_function)
+```
+
+In `model_function` we define the parameters of the model, architecture, loss function and how the parameters are updated(optimizer).
+
+In order to **distribute this training on multiple GPUs**, we simply add one line to the `run_config`
+
+```python
+# define distribution as mirrored strategy
+distribution = tf.contrib.distribute.MirroredStrategy()
+
+run_config = tf.estimator.RunConfig(train_distribute=distribution)
+
+# here is how we specify the estimator
+classifier = tf.estimator.Estimator(
+							model_fn  = model_function,
+  						model_dir = model_dir,
+  						config    = config
+)
+
+classifier.train(input_fn = input_function)
+```
 
 
 
