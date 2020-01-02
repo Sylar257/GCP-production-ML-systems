@@ -329,7 +329,17 @@ GCP is really great for deploying machine learning solutions. We have access to 
 
 This process is also called **Auto-ML** and that is possible only on the cloud. Even if we are building our own customized ML models instead of using ones provided by GCP, we still have reason to use GCP while TensorFlow is open source and a serverless execution environment like Cloud ML Engine will allow us work without worring about the infrastructure. Plus, integrating with distributed cloud storage and serverless BigQuery make the overall development experience a lot better than if he had to provision and manage all that infrastructure ourselves.
 
+
+
+One of the applications that we might consider hybrid systems is ML solution deployed on mobile device. We have two options here, upload the raw data(images, voices, videos) to the cloud and compute the inference on the cloud; or we could computer the feature extraction on the mobile device itself and send to the could only the extracted features. The second option would involve less network transfer and it’s a lot more efficient. At the same time, by applying machine learning technology to mobile apps, we can reduce network bandwidth and we could get faster response when we are communicating with the Cloud services. So in situations like this, we would like to **train** on the cloud and do the **prediction** on the device.
+
 ### KubeFlow
 
 It is designed to make it *easy for everyone to **Develop**, **Deploy** and **Manage Portable, Distributed** ML on Kubernetes.*
 
+KubeFlow benefits:
+
+* Portability: Works on any Kubernetes cluster, whether it lives on Google Cloud Platform (GCP), on-premise, or across providers.
+* Composability and reproducibility: Enhanced with service workers to work offline or on low-quality networks
+* Scalability: Can utilize fluctuating resources and is only constrained by the number of resources allocated to the Kubernetes cluster.
+* Visualization and collaboration: Pre-installed packages that can be easily deployed.
