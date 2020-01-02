@@ -317,6 +317,19 @@ classifier.train(input_fn = input_function)
 
 
 
-
-
 ## Hybrid_ML_system
+
+**Kubeflow** for building hybrid cloud machine learning models.
+
+### Why do we need hybrid systems
+
+Why not just use **GCP**? 
+
+GCP is really great for deploying machine learning solutions. We have access to ready-made models like the Vision API and NLP API, etc. The key aspect of these models is that they are trained on Google’s massive datasets. Sometimes, though, ready-to-run models like the Vision API *don’t quite fit*, and in that case, we might want to train a family of models using **our own images and own labels** to customize and add in the Vision API(similar to transfer learning). 
+
+This process is also called **Auto-ML** and that is possible only on the cloud. Even if we are building our own customized ML models instead of using ones provided by GCP, we still have reason to use GCP while TensorFlow is open source and a serverless execution environment like Cloud ML Engine will allow us work without worring about the infrastructure. Plus, integrating with distributed cloud storage and serverless BigQuery make the overall development experience a lot better than if he had to provision and manage all that infrastructure ourselves.
+
+### KubeFlow
+
+It is designed to make it *easy for everyone to **Develop**, **Deploy** and **Manage Portable, Distributed** ML on Kubernetes.*
+
